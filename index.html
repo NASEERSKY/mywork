@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة الطلاب</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .form-container {
+            padding: 40px;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 16px;
+            font-weight: 600;
+            color: #999;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab.active {
+            color: #667eea;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            right: 0;
+            width: 100%;
+            height: 3px;
+            background: #667eea;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .form {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .input-group input::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            right: 0;
+            width: 45%;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 45%;
+            height: 1px;
+            background: #ddd;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            color: #999;
+            font-size: 13px;
+        }
+
+        .social-login {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .social-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .social-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Student Data Form Styles */
+        .student-form {
+            background: white;
+            padding: 40px;
+        }
+
+        .welcome-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .welcome-header h2 {
+            color: #667eea;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .welcome-header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .input-icon {
+            position: relative;
+        }
+
+        .input-icon input,
+        .input-icon select {
+            padding-right: 45px;
+        }
+
+        .icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-right: 4px solid #28a745;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.4);
+        }
+
+        .student-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .student-card h3 {
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+        }
+
+        .student-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .info-item {
+            background: rgba(255,255,255,0.2);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .form-container, .student-form {
+                padding: 25px;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login/Register Container -->
+    <div class="container" id="authContainer">
+        <div class="form-container">
+            <div class="header">
+                <h1>👋 مرحباً بك</h1>
+                <p>سجل دخولك أو أنشئ حساباً جديداً</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('login')">تسجيل الدخول</button>
+                <button class="tab" onclick="switchTab('register')">إنشاء حساب</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" class="form active" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="loginUsername">اسم المستخدم</label>
+                    <div class="input-icon">
+                        <input type="text" id="loginUsername" placeholder="أدخل اسم المستخدم" required>
+                        <span class="icon">👤</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="loginPassword">كلمة المرور</label>
+                    <div class="input-icon">
+                        <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" required>
+                        <span class="icon">🔒</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">تسجيل الدخول</button>
+                
+                <div class="divider">
+                    <span>أو</span>
+                </div>
+
+                <div class="social-login">
+                    <button type="button" class="social-btn">📧 البريد الإلكتروني</button>
+                    <button type="button" class="social-btn">📱 رقم الهاتف</button>
+                </div>
+            </form>
+
+            <!-- Register Form -->
+            <form id="registerForm" class="form" onsubmit="handleRegister(event)">
+                <div class="input-group">
+                    <label for="regUsername">اسم المستخدم</label>
+                    <div class="input-icon">
+                        <input type="text" id="regUsername" placeholder="اختر اسم مستخدم فريد" required>
+                        <span class="icon">👤</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="regPassword">كلمة المرور</label>
+                    <div class="input-icon">
+                        <input type="password" id="regPassword" placeholder="اختر كلمة مرور قوية" required minlength="6">
+                        <span class="icon">🔒</span>
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label for="confirmPassword">تأكيد كلمة المرور</label>
+                    <div class="input-icon">
+                        <input type="password" id="confirmPassword" placeholder="أعد إدخال كلمة المرور" required>
+                        <span class="icon">🔐</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn">إنشاء حساب</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Student Data Container (Hidden by default) -->
+    <div class="container hidden" id="studentContainer">
+        <div class="student-form">
+            <div class="welcome-header">
+                <h2>🎓 بيانات الطالب</h2>
+                <p>يرجى إدخال معلومات الطالب التالية</p>
+            </div>
+
+            <div class="success-message" id="successMsg">
+                ✅ تم حفظ البيانات بنجاح!
+            </div>
+
+            <!-- Display Saved Data -->
+            <div id="savedData" class="hidden">
+                <div class="student-card">
+                    <h3>📋 ملف الطالب</h3>
+                    <div class="student-info">
+                        <div class="info-item">
+                            <div class="info-label">الاسم</div>
+                            <div class="info-value" id="displayName">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">العمر</div>
+                            <div class="info-value" id="displayAge">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">الطول</div>
+                            <div class="info-value" id="displayHeight">-</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">الصف</div>
+                            <div class="info-value" id="displayGrade">-</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center; background: rgba(255,255,255,0.2); padding: 10px; border-radius: 8px;">
+                        <div class="info-label">المدرسة</div>
+                        <div class="info-value" id="displaySchool">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Input Form -->
+            <form id="studentDataForm" onsubmit="saveStudentData(event)">
+                <div class="form-grid">
+                    <div class="input-group">
+                        <label for="studentName">👤 اسم الطالب</label>
+                        <input type="text" id="studentName" placeholder="أدخل اسم الطالب الكامل" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="studentAge">🎂 عمر الطالب</label>
+                        <input type="number" id="studentAge" placeholder="مثال: 15" min="5" max="25" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="studentHeight">📏 طول الطالب (سم)</label>
+                        <input type="number" id="studentHeight" placeholder="مثال: 170" min="50" max="250" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="studentGrade">📚 الصف الدراسي</label>
+                        <select id="studentGrade" required>
+                            <option value="">اختر الصف الدراسي</option>
+                            <option value="الأول الابتدائي">الأول الابتدائي</option>
+                            <option value="الثاني الابتدائي">الثاني الابتدائي</option>
+                            <option value="الثالث الابتدائي">الثالث الابتدائي</option>
+                            <option value="الرابع الابتدائي">الرابع الابتدائي</option>
+                            <option value="الخامس الابتدائي">الخامس الابتدائي</option>
+                            <option value="السادس الابتدائي">السادس الابتدائي</option>
+                            <option value="الأول المتوسط">الأول المتوسط</option>
+                            <option value="الثاني المتوسط">الثاني المتوسط</option>
+                            <option value="الثالث المتوسط">الثالث المتوسط</option>
+                            <option value="الأول الثانوي">الأول الثانوي</option>
+                            <option value="الثاني الثانوي">الثاني الثانوي</option>
+                            <option value="الثالث الثانوي">الثالث الثانوي</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group" style="grid-column: 1 / -1;">
+                        <label for="schoolName">🏫 اسم المدرسة</label>
+                        <input type="text" id="schoolName" placeholder="أدخل اسم المدرسة الكامل" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn" id="saveBtn">حفظ البيانات</button>
+                <button type="button" class="btn logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Switch between login and register tabs
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const forms = document.querySelectorAll('.form');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            forms.forEach(f => f.classList.remove('active'));
+            
+            if (tab === 'login') {
+                tabs[0].classList.add('active');
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('registerForm').classList.add('active');
+            }
+        }
+
+        // Handle Login
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Simple validation (in real app, this would be server-side)
+            const storedUser = localStorage.getItem('user_' + username);
+            
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                if (userData.password === password) {
+                    showStudentForm(username);
+                } else {
+                    alert('❌ كلمة المرور غير صحيحة!');
+                }
+            } else {
+                alert('❌ اسم المستخدم غير موجود! الرجاء إنشاء حساب جديد.');
+            }
+        }
+
+        // Handle Register
+        function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const confirmPass = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPass) {
+                alert('❌ كلمتا المرور غير متطابقتين!');
+                return;
+            }
+            
+            if (localStorage.getItem('user_' + username)) {
+                alert('❌ اسم المستخدم موجود مسبقاً!');
+                return;
+            }
+            
+            // Save user data
+            localStorage.setItem('user_' + username, JSON.stringify({
+                password: password,
+                username: username
+            }));
+            
+            alert('✅ تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.');
+            switchTab('login');
+            document.getElementById('registerForm').reset();
+        }
+
+        // Show Student Data Form
+        function showStudentForm(username) {
+            document.getElementById('authContainer').classList.add('hidden');
+            document.getElementById('studentContainer').classList.remove('hidden');
+            
+            // Load saved student data if exists
+            const savedData = localStorage.getItem('student_' + username);
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                document.getElementById('studentName').value = data.name || '';
+                document.getElementById('studentAge').value = data.age || '';
+                document.getElementById('studentHeight').value = data.height || '';
+                document.getElementById('studentGrade').value = data.grade || '';
+                document.getElementById('schoolName').value = data.school || '';
+                
+                displaySavedData(data);
+            }
+            
+            // Store current username
+            sessionStorage.setItem('currentUser', username);
+        }
+
+        // Save Student Data
+        function saveStudentData(e) {
+            e.preventDefault();
+            
+            const username = sessionStorage.getItem('currentUser');
+            const data = {
+                name: document.getElementById('studentName').value,
+                age: document.getElementById('studentAge').value,
+                height: document.getElementById('studentHeight').value,
+                grade: document.getElementById('studentGrade').value,
+                school: document.getElementById('schoolName').value
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('student_' + username, JSON.stringify(data));
+            
+            // Show success message
+            const successMsg = document.getElementById('successMsg');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+            
+            // Display saved data
+            displaySavedData(data);
+        }
+
+        // Display Saved Data Card
+        function displaySavedData(data) {
+            document.getElementById('displayName').textContent = data.name;
+            document.getElementById('displayAge').textContent = data.age + ' سنة';
+            document.getElementById('displayHeight').textContent = data.height + ' سم';
+            document.getElementById('displayGrade').textContent = data.grade;
+            document.getElementById('displaySchool').textContent = data.school;
+            
+            document.getElementById('savedData').classList.remove('hidden');
+        }
+
+        // Logout
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            document.getElementById('studentContainer').classList.add('hidden');
+            document.getElementById('authContainer').classList.remove('hidden');
+            document.getElementById('loginForm').reset();
+            document.getElementById('savedData').classList.add('hidden');
+        }
+
+        // Check if user is already logged in (on page load)
+        window.onload = function() {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                showStudentForm(currentUser);
+            }
+        };
+    </script>
+
+</body>
+</html>
